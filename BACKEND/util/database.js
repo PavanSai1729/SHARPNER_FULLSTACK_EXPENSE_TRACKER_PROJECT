@@ -5,4 +5,5 @@ const db = new Sequelize("expensetracker", "root", "Pavan@1729", {
     host: "localhost"
 });
 
+
 module.exports = db;

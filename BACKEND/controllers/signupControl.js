@@ -7,8 +7,15 @@ exports.postRequest = async(req, res, next) => {
         const email = req.body.email;
         const password = req.body.password;
 
+        const existingUser = await User.findOne({where: {email}});
+
+        if(existingUser){
+            return res.status(403).json({message: "user already exists"});
+        }
+
         const data = await User.create({name: name, email: email, password: password});
-        res.status(201).json({newItem: data});
+        res.status(201).json({message: "user registered successfully"});
+
 
     }
     catch(error){

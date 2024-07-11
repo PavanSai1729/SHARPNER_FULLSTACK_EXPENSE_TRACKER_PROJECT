@@ -6,3 +6,4 @@ const db = new Sequelize("expensetracker", "root", "Pavan@1729", {
 });
 
 module.exports = db;
+

@@ -51,16 +51,27 @@ exports.login = async(req, res, next) => {
             if(err){
                 res.status(500).json({success: false, message: "something went wrong"});
             }
-            if(result === true){
-                res.status(200).json({success: true, message: "user logged in successfully"});
+
+            if(result){
+                //res.status(200).json({success: true, message: "user logged in successfully"});
+                //return res.redirect("D:\Java_Script\Sharpner\Node.js\sharpner_projects\Full_Stack_Expense_Tracker_Final_Project\FRONTEND\expense\expense.html");
+                return res.json({
+                    success: true,
+                    message: "User logged in successfully",
+                    redirectUrl: "..\FRONTEND\expense\expense.html"
+                });
+            }
+
+            else{
+                return res.status(401).json({message: "invalid password"});
             }
         });
 
-        if(existingUser.password != password){
-            return res.status(401).json({message: "invalid password"});
-        }
+        // if(existingUser.password != password){
+        //     return res.status(401).json({message: "invalid password"});
+        // }
 
-        res.status(200).json({message: "login successfully"});
+        // res.status(200).json({message: "login successfully"});
 
 
     }

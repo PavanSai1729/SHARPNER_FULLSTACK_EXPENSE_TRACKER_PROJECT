@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expensive Tracker</title>
+</head>
+<body>
+<h1>EXPENSIVE TRACKER</h1>
+<hr>
+    <form id="expenseForm">
+        <label for="amount">Amount:</label>
+        <input type="text" id="amount" name="amount" required>
+        <label for="description">Description: </label>
+        <input type="text" name="description" id="description" required>
+        <label for="category"></label>
+        <select id="category" name="category" required>
+            <option value="Food">Food</option>
+            <option value="Fuel">Fuel</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Movies">Movies</option>
+        </select>
+        <button type="submit" name="addBtn">Add Expense</button>
+
+    </form>
+<hr>
+
+<ul id="ul"></ul>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.4/axios.min.js"></script>
+<script src="expense.js"></script>
+
+    
+</body>
+</html>

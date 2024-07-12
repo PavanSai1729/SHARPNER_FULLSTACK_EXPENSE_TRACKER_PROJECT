@@ -12,7 +12,12 @@ loginForm.addEventListener("submit", async(event)=>{
     }
 
     const response = await axios.post("http://localhost:1000/user/login", Obj);
-        alert(response.data.message);    
+        
+        if (response.data.success) {
+            window.location.href = response.data.redirectUrl; // Redirect to expense.html
+        } else {
+            alert(response.data.message);
+        }
     
     }
     catch(error){

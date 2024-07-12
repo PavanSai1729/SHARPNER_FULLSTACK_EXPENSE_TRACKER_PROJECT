@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>login</title>
+    <title>Signup</title>
 </head>
 <body>
 
-    <form id="loginForm">
+    <form id="signupForm">
 
-        
+        <label for="name">Enter Your Name  :</label>
+        <input type="text" name="name" id="name" required><br><br>
         <label for="email">Enter Your Email :</label>
         <input type="email" name="email" id="email" required><br><br>
         <label for="password">Enter Password  :</label>
         <input type="password" name="password" id="password" required><br><br>
-        <button type="submit" id="loginBtn">login</button>
+        <button type="submit" id="signupBtn">Signup</button>
 
 
     </form>
 
-    <a href="signup.html">New User - SingUp</a>
+    <a href="../login/login.html">Existing User -Login</a>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.1/axios.min.js"></script>
-    <script src="login.js"></script>
+    <script src="signup.js"></script>
     
 </body>
 </html>

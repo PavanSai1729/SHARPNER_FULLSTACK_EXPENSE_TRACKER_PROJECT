@@ -1,6 +1,6 @@
 const loginForm = document.getElementById("loginForm");
-loginForm.addEventListener("submit", async(event)=>{
-    try{
+loginForm.addEventListener("submit", (event)=>{
+    
     event.preventDefault();
 
     const email = document.getElementById("email").value;
@@ -11,16 +11,12 @@ loginForm.addEventListener("submit", async(event)=>{
         password
     }
 
-    const response = await axios.post("http://localhost:1000/user/login", Obj);
-        
-        if (response.data.success) {
-            window.location.href = response.data.redirectUrl; // Redirect to expense.html
-        } else {
+    axios.post("http://localhost:1000/user/login", Obj)
+        .then((response)=> {
             alert(response.data.message);
-        }
-    
-    }
-    catch(error){
+            window.location.href= "../expense/expense.html";
+        })
+        .catch((error)=>{
             //console.log(JSON.stringify(error));
 
             let errorMessage = "An error occurred";
@@ -30,7 +26,7 @@ loginForm.addEventListener("submit", async(event)=>{
 
             document.body.innerHTML += `<div style="color:red;">${errorMessage}</div>`;
 
-        }
+        });
 
 
 });

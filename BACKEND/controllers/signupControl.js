@@ -1,6 +1,15 @@
 const User = require("../models/signupModel");
 const bcrypt = require("bcrypt");
 
+function isstringinvalid(string){
+    if(string == undefined || string.length ==0){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
+
 exports.signup = async(req, res, next) => {
     try{
 
@@ -8,23 +17,17 @@ exports.signup = async(req, res, next) => {
         const email = req.body.email;
         const password = req.body.password;
 
-        if(!name || !password || !email){
-            return res.status(400).json({error: "one of the name, password, email value is missing"});
-        }
-
-        const existingUser = await User.findOne({where: {email}});
-
-        if(existingUser){
-            return res.status(403).json({message: "user already exists"});
+        if(isstringinvalid(name) || isstringinvalid(email) || isstringinvalid(password)){
+            return res.status(400).json({error: "Bad parameters something is missing"});
         }
 
         const saltrounds =10;
-        bcrypt.hash(password, saltrounds, async(err, hash)=>{
-            console.log(err);
-            await User.create({name, email, password: hash});
-            res.status(201).json({message: "user registered successfully"});
+        const hashedPassword = await bcrypt.hash(password, saltrounds);
 
-        })
+        await User.create({name, email, password: hashedPassword});
+        res.status(201).json({message: "user registered successfully"});
+
+    
     }
     catch(error){
         console.log("post request in database failed", error);
@@ -40,43 +43,32 @@ exports.login = async(req, res, next) => {
         const email = req.body.email;
         const password = req.body.password;
 
-        const existingUser = await User.findOne({where: {email}});
-       
-
-        if(!existingUser){
-            return res.status(404).json({message: "user not found please signup"});
+        if(isstringinvalid(email) || isstringinvalid(password)){
+            return res.status(400).json({message: "Email or Password is missing"})
         }
 
-        bcrypt.compare(password, existingUser.password, (err, result)=>{
-            if(err){
-                res.status(500).json({success: false, message: "something went wrong"});
-            }
+        const allUsers = await User.findAll({where: {email}});
+            if(allUsers.length>0){
+                bcrypt.compare(password, allUsers[0].password, (err, result)=>{
+                    if(err){
+                        res.status(500).json({success: false, message: "something went wrong"});
+                    }
 
-            if(result){
-                //res.status(200).json({success: true, message: "user logged in successfully"});
-                //return res.redirect("D:\Java_Script\Sharpner\Node.js\sharpner_projects\Full_Stack_Expense_Tracker_Final_Project\FRONTEND\expense\expense.html");
-                return res.json({
-                    success: true,
-                    message: "User logged in successfully",
-                    redirectUrl: "..\FRONTEND\expense\expense.html"
-                });
-            }
+                    if(result == true){
+                        res.status(200).json({success: false, message: "user logged in successfully"});
+                    }
 
+                    else{
+                        return res.status(400).json({success: false, message: "password is incorrect"});
+                    }
+                })
+            }
             else{
-                return res.status(401).json({message: "invalid password"});
+                return res.status(404).json({success: false, message: "user does not exist"});
             }
-        });
-
-        // if(existingUser.password != password){
-        //     return res.status(401).json({message: "invalid password"});
-        // }
-
-        // res.status(200).json({message: "login successfully"});
-
-
-    }
-    catch(error){
-        console.log("error during login ", error);
-        res.status(500).json({error: error});
+        }
+        catch(error){
+            //console.log("error during login ", error);
+            res.status(500).json({message: error, success: false});
     }
 }

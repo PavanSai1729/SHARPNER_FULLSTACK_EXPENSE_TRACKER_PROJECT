@@ -1,6 +1,6 @@
 const loginForm = document.getElementById("loginForm");
-loginForm.addEventListener("submit", (event)=>{
-
+loginForm.addEventListener("submit", async(event)=>{
+    try{
     event.preventDefault();
 
     const email = document.getElementById("email").value;
@@ -11,14 +11,21 @@ loginForm.addEventListener("submit", (event)=>{
         password
     }
 
-    axios.post("http://localhost:1000/user/login", Obj)
-        .then((response)=>{
-            console.log("login successful ", response.data);
+    const response = await axios.post("http://localhost:1000/user/login", Obj);
+        alert(response.data.message);    
+    
+    }
+    catch(error){
+            //console.log(JSON.stringify(error));
 
-        })
-        .catch((error)=>{
-            console.log("Error from Axios login request: ", error);
-        })
+            let errorMessage = "An error occurred";
+            if (error.response && error.response.data && error.response.data.message) {
+            errorMessage = error.response.data.message;
+           }
+
+            document.body.innerHTML += `<div style="color:red;">${errorMessage}</div>`;
+
+        }
 
 
 });

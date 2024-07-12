@@ -8,8 +8,8 @@ exports.postRequest = async(req, res, next) => {
 
         const existingUser = await User.findOne({where: {email}});
 
-        if(existingUser){
-            return res.status(403).json({message: "user not found please signup"});
+        if(!existingUser){
+            return res.status(404).json({message: "user not found please signup"});
         }
 
         if(existingUser.password != password){

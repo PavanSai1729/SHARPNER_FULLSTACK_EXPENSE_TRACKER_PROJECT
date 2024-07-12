@@ -1,6 +1,7 @@
 const signupForm = document.getElementById("signupForm");
-signupForm.addEventListener("submit", (event)=>{
+signupForm.addEventListener("submit", async(event)=>{
 
+    try{
     event.preventDefault();
 
     const name = document.getElementById("name").value;
@@ -13,13 +14,23 @@ signupForm.addEventListener("submit", (event)=>{
         password
     }
 
-    axios.post("http://localhost:1000/user/signup", Obj)
-        .then((response)=>{
-            console.log(response.data);
-        })
-        .catch((error)=>{
-            console.log("Error from Axios Post request: ", error);
-        })
+    const response = await axios.post("http://localhost:1000/user/signup", Obj);
+        if(response.status === 201){
+            window.location.href="login.html";
+        }
+        else{
+            throw new Error("Failed to login");
+        }
+    }
+    catch(error){
+        let errorMessage = "An Error Occuresd";
+
+        if(error.response && error.response.data && error.response.data.message){
+            errorMessage = error.response.data.message;
+        }
+
+        document.body.innerHTML += `<div style="color: red;">${errorMessage}</div>`;
+    }
 
 
 });

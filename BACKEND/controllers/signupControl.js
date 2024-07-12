@@ -7,6 +7,10 @@ exports.postRequest = async(req, res, next) => {
         const email = req.body.email;
         const password = req.body.password;
 
+        if(!name || !password || !email){
+            return res.status(400).json({error: "one of the name, password, email value is missing"});
+        }
+
         const existingUser = await User.findOne({where: {email}});
 
         if(existingUser){

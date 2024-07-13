@@ -1,10 +1,11 @@
 //get Request
 
 window.addEventListener("DOMContentLoaded", (event)=>{
+    const token = localStorage.getItem("token");
 
-    axios.get("http://localhost:1000/expense/get-expenses")
+    axios.get("http://localhost:1000/expense/get-expenses", { headers: {"Authorization" : token }})
         .then((result)=>{
-            console.log(result.data.allExpenses);
+           //console.log(result.data.allExpenses);
 
             for(var i=0; i<result.data.allExpenses.length; i++){
                 showExpenseOnScreen(result.data.allExpenses[i]);
@@ -24,20 +25,26 @@ form.addEventListener("submit", (event) => {
     const amount = document.getElementById("amount").value;
     const description = document.getElementById("description").value;
     const category = document.getElementById("category").value;
+    //const UserId = 1;
+    
 
     const expenseObj = {
         amount,
         description,
-        category 
+        category,
+        //UserId
+        
     }
+    //console.log("EXPENSE DETAILS: ", expenseObj);
 
-    axios.post("http://localhost:1000/expense/add-expense", expenseObj) 
+    const token = localStorage.getItem("token");
+    axios.post("http://localhost:1000/expense/add-expense", expenseObj, { headers: {"Authorization" : token}} ) 
         .then((result) => {
-            console.log(result);
+            //console.log(result);
             showExpenseOnScreen(result.data.newExpenseDetails);
         })
         .catch((error) => {
-            console.log("put request error from axios ", error);
+            console.log("post request error from axios :", error);
         });
 });
 
@@ -59,7 +66,7 @@ function showExpenseOnScreen(expense){
         const currentElement = event.target.parentElement;
         const pElement = document.getElementById("ul");
 
-        axios.delete(`http://localhost:1000/expense/delete-expense/${expense.id}`)
+        axios.delete(`http://localhost:1000/expense/delete-expense/${expense.id}`, { headers: { "Authorization": token }})
             .then((result) => {
                 console.log(result);
                 pElement.removeChild(currentElement);

@@ -1,8 +1,10 @@
 const User = require("../models/signupModel");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 
 function isstringinvalid(string){
-    if(string == undefined || string.length ==0){
+    if(string == undefined || string.length == 0){
         return true;
     }
     else{
@@ -36,6 +38,11 @@ exports.signup = async(req, res, next) => {
 }
 
 
+function generateAccessToken(id){
+    return jwt.sign({UserId : id}, "pavansaiburada7702705695");
+}
+
+
 
 exports.login = async(req, res, next) => {
     try{
@@ -47,15 +54,17 @@ exports.login = async(req, res, next) => {
             return res.status(400).json({message: "Email or Password is missing"})
         }
 
-        const allUsers = await User.findAll({where: {email}});
-            if(allUsers.length>0){
-                bcrypt.compare(password, allUsers[0].password, (err, result)=>{
+        const user = await User.findAll({where: {email}});
+            if(user.length>0){
+                bcrypt.compare(password, user[0].password, (err, result)=>{
                     if(err){
-                        res.status(500).json({success: false, message: "something went wrong"});
+                        
+                        return res.status(500).json({success: false, message: "something went wrong"});
                     }
 
-                    if(result == true){
-                        res.status(200).json({success: false, message: "user logged in successfully"});
+                    if(result === true){
+                        console.log("----user id:----", user[0].id);
+                       return res.status(200).json({success: true, message: "user logged in successfully", token: generateAccessToken(user[0].id)});
                     }
 
                     else{

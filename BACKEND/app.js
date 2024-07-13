@@ -7,8 +7,9 @@ const User = require("./models/signupModel");
 
 const db = require("./util/database");
 const signupRoutes = require("./routes/signupRoutes");
-//const loginRoutes = require("./routes/loginRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+//const purchaseRoutes = require("./routes/purchase");
+//const premiumFeatureRoutes = require("./routes/premiumFeature");
 
 
 const app = express();

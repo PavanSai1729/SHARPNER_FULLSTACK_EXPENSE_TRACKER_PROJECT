@@ -65,6 +65,7 @@ function showExpenseOnScreen(expense){
     deleteBtn.addEventListener("click", (event)=>{
         const currentElement = event.target.parentElement;
         const pElement = document.getElementById("ul");
+        const token = localStorage.getItem("token");
 
         axios.delete(`http://localhost:1000/expense/delete-expense/${expense.id}`, { headers: { "Authorization": token }})
             .then((result) => {
@@ -99,4 +100,36 @@ function showExpenseOnScreen(expense){
 
     pElement.appendChild(newElement);
   
+}
+
+//premium functionality
+
+const buyBtn = document.getElementById("buyBtn");
+buyBtn.onclick = async function(event){
+    const token = localStorage.getItem("token");
+    const response = await axios.get('http://localhost:1000/purchase/premiummembership', { headers: { "Authorization": token }});
+    var options = {
+        "key" : response.data.key_id,
+        "order_id" : response.data.order.id,
+        "handler" : async function(response){
+            const res = await axios.post('http://localhost:1000/purchase/updatetransactionstatus', {
+                order_id : options.order_id,
+                payment_id: response.razorpay_payment_id
+            }, { headers: { "Authorization": token }});
+
+            alert("you are Premium User Now");
+            // document.getElementById("buyBtn").style.visibility = "hidden";
+            // //document.getElementById("message").innerHTML = "You are a premium user";
+            // localStorage.setItem("token", res.data.token);
+        }
+    }
+
+    // const rzp1 = new Razorpay(options);
+    // rzp1.open();
+    // event.preventDefault();
+
+    // rzp1.on("payment.failed", function(response){
+    //     console.log(response);
+    //     alert("something went wrong");
+    // });
 }

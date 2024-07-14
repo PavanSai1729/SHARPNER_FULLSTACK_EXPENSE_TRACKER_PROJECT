@@ -104,32 +104,44 @@ function showExpenseOnScreen(expense){
 
 //premium functionality
 
-const buyBtn = document.getElementById("buyBtn");
-buyBtn.onclick = async function(event){
+document.getElementById("buyBtn").onclick = async function(event){
+    try{
     const token = localStorage.getItem("token");
     const response = await axios.get('http://localhost:1000/purchase/premiummembership', { headers: { "Authorization": token }});
+    
     var options = {
         "key" : response.data.key_id,
         "order_id" : response.data.order.id,
-        "handler" : async function(response){
+        "handler" : async function(paymentResponse){
+            try{
             const res = await axios.post('http://localhost:1000/purchase/updatetransactionstatus', {
                 order_id : options.order_id,
-                payment_id: response.razorpay_payment_id
+                payment_id: paymentResponse.razorpay_payment_id
             }, { headers: { "Authorization": token }});
 
             alert("you are Premium User Now");
-            // document.getElementById("buyBtn").style.visibility = "hidden";
-            // //document.getElementById("message").innerHTML = "You are a premium user";
-            // localStorage.setItem("token", res.data.token);
+            document.getElementById("buyBtn").style.visibility = "hidden";
+            //document.getElementById("message").innerHTML = "You are a premium user";
+            localStorage.setItem("token", res.data.token);
+        }
+        catch(error){
+            console.log(error);
+            alert("Error updating transactioin status");
         }
     }
+};
 
-    // const rzp1 = new Razorpay(options);
-    // rzp1.open();
-    // event.preventDefault();
+    const rzp1 = new Razorpay(options);
+    rzp1.open();
+    event.preventDefault();
 
-    // rzp1.on("payment.failed", function(response){
-    //     console.log(response);
-    //     alert("something went wrong");
-    // });
+    rzp1.on("payment.failed", function(response){
+        console.log(response);
+        alert("something went wrong with the payment");
+    });
 }
+catch(error){
+    console.log(error);
+    alert("Error initiating purchase");
+}
+};

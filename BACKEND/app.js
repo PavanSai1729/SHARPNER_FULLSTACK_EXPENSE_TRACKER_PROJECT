@@ -4,11 +4,12 @@ const cors = require("cors");
 
 const Expense = require("./models/expenseModel");
 const User = require("./models/signupModel");
+const Order = require("./models/orders");
 
 const db = require("./util/database");
 const signupRoutes = require("./routes/signupRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
-//const purchaseRoutes = require("./routes/purchase");
+const purchaseRoutes = require("./routes/purchase");
 //const premiumFeatureRoutes = require("./routes/premiumFeature");
 
 
@@ -24,10 +25,13 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(signupRoutes);
 app.use(expenseRoutes);
-//app.use(loginRoutes);
+app.use(purchaseRoutes);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);
+
+User.hasMany(Order);
+Order.belongsTo(User);
 
 db 
     .sync()

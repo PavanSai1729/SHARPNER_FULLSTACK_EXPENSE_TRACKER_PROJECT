@@ -42,7 +42,7 @@ function generateAccessToken(id){
     return jwt.sign({UserId : id}, "pavansaiburada7702705695");
 }
 
-
+exports.generateAccessToken = generateAccessToken;
 
 exports.login = async(req, res, next) => {
     try{

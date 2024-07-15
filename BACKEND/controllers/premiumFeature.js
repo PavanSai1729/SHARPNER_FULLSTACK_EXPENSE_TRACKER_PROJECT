@@ -14,7 +14,7 @@ const getUserLeaderBoard = async (req, res) => {
                     attributes: []
                 }
             ],
-            group: ["UserId"],
+            group: ["users.id"],
             order: [["total_cost", "DESC"]]
         })
 
@@ -23,7 +23,8 @@ const getUserLeaderBoard = async (req, res) => {
 
     }
     catch(error){
-        console.log(error);
+        
+        console.log("error from BACKEND LEADERBOARD: ", error);
         res.status(500).json(error);
     }
 }

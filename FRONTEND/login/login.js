@@ -31,3 +31,17 @@ loginForm.addEventListener("submit", (event)=>{
 
 
 });
+
+const forgetForm = document.getElementById("forget").value;
+forgetForm.addEventListener("submit", (event)=>{
+    event.preventDefault();
+    const email = document.getElementById("forget_email").value;
+
+    axios.post("http://localhost:1000/password/forgotpassword", { email })
+        .then((response)=>{
+            console.log(response);
+        })
+        .catch((error)=>{
+            console.log("forget password post request failed from front end:", error);
+        });
+});

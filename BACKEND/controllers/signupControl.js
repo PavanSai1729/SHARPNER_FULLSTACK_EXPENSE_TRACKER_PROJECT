@@ -38,8 +38,8 @@ exports.signup = async(req, res, next) => {
 }
 
 
-function generateAccessToken(id){
-    return jwt.sign({UserId : id}, "pavansaiburada7702705695");
+function generateAccessToken(id, name, ispremiumuser){
+    return jwt.sign({UserId : id, name: name, ispremiumuser }, "pavansaiburada7702705695");
 }
 
 exports.generateAccessToken = generateAccessToken;
@@ -64,7 +64,7 @@ exports.login = async(req, res, next) => {
 
                     if(result === true){
                         console.log("----user id:----", user[0].id);
-                       return res.status(200).json({success: true, message: "user logged in successfully", token: generateAccessToken(user[0].id)});
+                       return res.status(200).json({success: true, message: "user logged in successfully", token: generateAccessToken(user[0].id, user[0].name, user[0].ispremiumuser)});
                     }
 
                     else{

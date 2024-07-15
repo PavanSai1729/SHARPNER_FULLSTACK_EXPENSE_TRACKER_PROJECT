@@ -1,7 +1,34 @@
+
+
+function showPremiumuserMessage(){
+    document.getElementById("buyBtn").style.visibility = "hidden";
+    document.getElementById("message").innerHTML = "You are a premium user";
+}
+
+
+
+function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+
+
 //get Request
 
 window.addEventListener("DOMContentLoaded", (event)=>{
     const token = localStorage.getItem("token");
+    const decodeToken = parseJwt(token);
+    console.log(decodeToken);
+    const ispremiumuser = decodeToken.ispremiumuser;
+    if(ispremiumuser){
+       showPremiumuserMessage();
+       showLeaderboard();
+    }
 
     axios.get("http://localhost:1000/expense/get-expenses", { headers: {"Authorization" : token }})
         .then((result)=>{
@@ -121,15 +148,17 @@ document.getElementById("buyBtn").onclick = async function(event){
 
             alert("you are Premium User Now");
             document.getElementById("buyBtn").style.visibility = "hidden";
-            //document.getElementById("message").innerHTML = "You are a premium user";
+            document.getElementById("message").innerHTML = "You are a premium user";
             localStorage.setItem("token", res.data.token);
+            showLeaderboard();
         }
         catch(error){
             console.log(error);
             alert("Error updating transactioin status");
         }
     }
-};
+}; 
+  
 
     const rzp1 = new Razorpay(options);
     rzp1.open();
@@ -145,3 +174,24 @@ catch(error){
     alert("Error initiating purchase");
 }
 };
+
+
+// premium user feature
+
+function showLeaderboard(){
+    const inputElement = document.createElement("input");
+    inputElement.type = "button";
+    inputElement.value = "Show Leaderboard";
+    inputElement.onclick = async() =>{
+        const token = localStorage.getItem("token");
+        const userLeaderBoardArray = await axios.get('http://localhost:1000/premium/showLeaderBoard', { headers: { "Authorization": token }});
+        console.log(userLeaderBoardArray);
+
+        var leaderboardElement = document.getElementById("leaderboard");
+        leaderboardElement.innerHTML += "<h1> Leader Board </h1>";
+        userLeaderBoardArray.data.forEach((userDetails)=>{
+            leaderboardElement.innerHTML += "<li>Name - ${userDetails.name} Total Expense - ${userDetails.total_cost || 0}</li>"
+        }) 
+    }
+    document.getElementById("message").appendChild(inputElement);
+}

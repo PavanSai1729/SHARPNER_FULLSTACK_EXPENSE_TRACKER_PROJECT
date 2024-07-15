@@ -10,7 +10,7 @@ const db = require("./util/database");
 const signupRoutes = require("./routes/signupRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 const purchaseRoutes = require("./routes/purchase");
-//const premiumFeatureRoutes = require("./routes/premiumFeature");
+const premiumFeatureRoutes = require("./routes/premiumFeature");
 
 
 const app = express();
@@ -26,6 +26,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(signupRoutes);
 app.use(expenseRoutes);
 app.use(purchaseRoutes);
+app.use(premiumFeatureRoutes);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);

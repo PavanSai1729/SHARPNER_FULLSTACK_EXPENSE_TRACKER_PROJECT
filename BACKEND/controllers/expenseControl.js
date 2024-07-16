@@ -1,6 +1,8 @@
 
+
 const Expense = require("../models/expenseModel");
 const User = require("../models/signupModel");
+const sequelize = require("../util/database");
 
 exports.postRequest = async(req, res, next) => {
     const t = await sequelize.transaction();

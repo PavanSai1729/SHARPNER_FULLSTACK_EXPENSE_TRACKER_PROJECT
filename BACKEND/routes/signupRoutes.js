@@ -5,6 +5,6 @@ const signupControl = require("../controllers/signupControl");
 
 router.post("/user/signup", signupControl.signup);
 router.post("/user/login", signupControl.login);
-//router.post("/password/forgotpassword", )
+
 
 module.exports = router;

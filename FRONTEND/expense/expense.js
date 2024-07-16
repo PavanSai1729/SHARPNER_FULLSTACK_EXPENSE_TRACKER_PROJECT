@@ -28,6 +28,7 @@ window.addEventListener("DOMContentLoaded", (event)=>{
     if(ispremiumuser){
        showPremiumuserMessage();
        showLeaderboard();
+       reportGeneration();
     }
 
     axios.get("http://localhost:1000/expense/get-expenses", { headers: {"Authorization" : token }})
@@ -182,6 +183,34 @@ function showLeaderboard(){
     const inputElement = document.createElement("input");
     inputElement.type = "button";
     inputElement.value = "Show Leaderboard";
+    inputElement.onclick = async() =>{
+        try{
+        const token = localStorage.getItem("token");
+        const userLeaderBoardArray = await axios.get('http://localhost:1000/premium/showLeaderBoard', { headers: { "Authorization": token }});
+        console.log(userLeaderBoardArray);
+
+        var leaderboardElement = document.getElementById("leaderboard");
+        leaderboardElement.innerHTML = "<h1> Leader Board </h1>";
+        userLeaderBoardArray.data.forEach((userDetails)=>{
+        leaderboardElement.innerHTML += `<li>Name - ${userDetails.name} & Total Expense - ${userDetails.total_cost || 0}</li>`;
+        });
+    }
+        catch(error){
+            console.log("error from getting leader board from front end:", error);
+
+        }
+       
+        }
+    
+    document.getElementById("message").appendChild(inputElement);
+}
+
+
+
+function reportGeneration(){
+    const inputElement = document.createElement("input");
+    inputElement.type = "button";
+    inputElement.value = "Report Generation";
     inputElement.onclick = async() =>{
         try{
         const token = localStorage.getItem("token");

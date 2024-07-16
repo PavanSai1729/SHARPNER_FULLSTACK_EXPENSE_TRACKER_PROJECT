@@ -105,27 +105,6 @@ function showExpenseOnScreen(expense){
             });
     });
 
-
-    // const editBtn = document.createElement("button");
-    // editBtn.textContent = "Edit Expense";
-    // newElement.appendChild(editBtn);
-
-    // editBtn.addEventListener("click", (event) => {
-    //     const currentElement = event.target.parentElement;
-    //     const pElement = document.getElementById("ul");
-
-    //     axios.delete(`http://localhost:1111/delete-expense/${expense.id}`)
-    //         .then((result) => {
-    //             console.log(result);
-    //             console.log("edit request: ", result.data);
-    //             pElement.removeChild(currentElement);
-                
-    //         })
-    //         .catch((error) => {
-    //             console.log("edit request fail from axios", error);
-    //         });
-    // });
-
     pElement.appendChild(newElement);
   
 }

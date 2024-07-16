@@ -1,6 +1,11 @@
 const User = require("../models/signupModel");
+const Expense = require("../models/expenseModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
+const path = require('path');
+const fs = require('fs');
+const { createObjectCsvWriter } = require('csv-writer');
 
 
 function isstringinvalid(string){
@@ -81,3 +86,50 @@ exports.login = async(req, res, next) => {
             res.status(500).json({message: error, success: false});
     }
 }
+
+
+
+exports.reportGeneration = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Fetch user expenses
+        const expenses = await Expense.findAll({ where: { userId } });
+
+        if (expenses.length === 0) {
+            return res.status(404).json({ message: 'No expenses found for the user.' });
+        }
+
+        // Define CSV file path
+        const downloadsDir = path.join(__dirname, '..', 'downloads');
+        const filePath = path.join(downloadsDir, `expenses_${userId}.csv`);
+
+        // Ensure the downloads directory exists
+        if (!fs.existsSync(downloadsDir)) {
+            fs.mkdirSync(downloadsDir);
+        }
+
+        // Define CSV writer
+        const csvWriter = createObjectCsvWriter({
+            path: filePath,
+            header: [
+                { id: 'id', title: 'ID' },
+                { id: 'amount', title: 'Amount' },
+                { id: 'description', title: 'Description' },
+                { id: 'category', title: 'Category' }
+            ]
+        });
+
+        // Write expenses to CSV
+        await csvWriter.writeRecords(expenses.map(expense => expense.dataValues));
+
+        // Send file URL for download
+        
+        res.status(201).json({ fileUrl: `http://localhost:1000/downloads/expenses_${userId}.csv` });
+    } catch (error) {
+        console.log("Getting report from database failed: ", error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+

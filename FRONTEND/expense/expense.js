@@ -185,25 +185,32 @@ function showLeaderboard(){
 }
 
 
+// report generation
 
 function reportGeneration(){
+    const token = localStorage.getItem("token");
     const inputElement = document.createElement("input");
     inputElement.type = "button";
     inputElement.value = "Report Generation";
     inputElement.onclick = async() =>{
         try{
-        const token = localStorage.getItem("token");
-        const userLeaderBoardArray = await axios.get('http://localhost:1000/premium/showLeaderBoard', { headers: { "Authorization": token }});
-        console.log(userLeaderBoardArray);
-
-        var leaderboardElement = document.getElementById("leaderboard");
-        leaderboardElement.innerHTML = "<h1> Leader Board </h1>";
-        userLeaderBoardArray.data.forEach((userDetails)=>{
-        leaderboardElement.innerHTML += `<li>Name - ${userDetails.name} & Total Expense - ${userDetails.total_cost || 0}</li>`;
-        });
+            const response = await axios.get('http://localhost:1000/user/download', {
+                headers: { "Authorization": token }
+            });
+    
+            if (response.status === 201) {
+                // The backend is essentially sending a download link
+                // which if we open in the browser, the file would download
+                const a = document.createElement("a");
+                a.href = response.data.fileUrl;
+                a.download = 'myexpense.csv';
+                a.click();
+            } else {
+                throw new Error(response.data.message);
+            }
     }
         catch(error){
-            console.log("error from getting leader board from front end:", error);
+            console.log("report generation failed:", error);
 
         }
        
@@ -211,3 +218,7 @@ function reportGeneration(){
     
     document.getElementById("message").appendChild(inputElement);
 }
+
+
+
+

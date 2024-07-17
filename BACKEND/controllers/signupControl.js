@@ -2,20 +2,23 @@ const User = require("../models/signupModel");
 const Expense = require("../models/expenseModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const bodyParser = require("body-parser");
 
-const getExpenses = require("../services/UserServices"); // Adjust this import based on your actual file structure
-const uplaodToS3 = require("../services/S3Service"); // Adjust this import based on your actual file structure
-
+//const getExpenses = require("../services/UserServices"); // Adjust this import based on your actual file structure
+//const uplaodToS3 = require("../services/S3Service"); // Adjust this import based on your actual file structure
+const express = require("express");
+const router = express.Router();
 
 const path = require('path');
 const fs = require('fs');
 const { createObjectCsvWriter } = require('csv-writer');
-
+const AWS=require('aws-sdk');
 const { BlobServiceClient } = require("@azure/storage-blob");
 const { v1: uuidv1 } = require("uuid");
 require('dotenv').config();
+const sequelize=require('../util/database');
 
-
+router.use(bodyParser.json());
 
 function isstringinvalid(string){
     if(string == undefined || string.length == 0){
@@ -97,21 +100,53 @@ exports.login = async(req, res, next) => {
 }
 
 
+//report generation
+
+function uploadToS3(data,filename){
+    const BUCKET_NAME=process.env.BUCKET_NAME
+    const IAM_USER_KEY=process.env.IAM_USER_KEY
+    const IAM_SECRET_KEY=process.env.IAM_SECRET_KEY
+
+    let s3bucket=new AWS.S3({
+        accessKeyId:IAM_USER_KEY,
+        secretAccessKey:IAM_SECRET_KEY,
+        Bucket:BUCKET_NAME
+    })
+
+    
+        var params={
+            Bucket:BUCKET_NAME,
+            Key:filename,
+            Body:data,
+            ACL:'public-read'
+        }
+
+        return new Promise((resolve,reject)=>{
+            s3bucket.upload(params,(err,s3response)=>{
+                if(err){
+                    console.log("Something went wrong",err);
+                    reject(err);
+                }
+                else{
+                    console.log("SUCCESS",s3response);
+                    resolve(s3response.Location);
+                }
+            })
+        })
+        
+
+}
+
 
 exports.reportGeneration = async (req, res) => {
     try {
-        // Assuming getExpenses returns expenses for the user
-        const expenses = await getExpenses(req);
-        console.log(expenses);
-
-        const stringifiedExpenses = JSON.stringify(expenses);
-        const userId = req.user.id;
-
-        const filename = `Expense${userId}/${new Date().toISOString()}.txt`; // Corrected filename construction
-        const fileURL = await uplaodToS3(stringifiedExpenses, filename); // Corrected function name
-
-        console.log(fileURL);
-        res.status(200).json({ fileURL, success: true });
+        const expenses=await req.user.getExpenses();
+        //console.log("expenses=======>",expenses);
+        const stringfiedExpenses=JSON.stringify(expenses);
+        const userId=req.user.id;
+        const filename=`Expense${userId}/${new Date()}.txt`;
+        const fileURL=await uploadToS3(stringfiedExpenses,filename);
+        res.status(200).json({fileURL, success:true})
     } catch (error) {
         console.error(error);
         res.status(500).json({ fileURL: "", success: false, error: error.message || "Something went wrong" });

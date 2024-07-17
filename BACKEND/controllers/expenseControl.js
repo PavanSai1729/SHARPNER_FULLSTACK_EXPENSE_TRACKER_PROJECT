@@ -8,13 +8,7 @@ exports.postRequest = async(req, res, next) => {
     const t = await sequelize.transaction();
 
     try{
-
-        // const amount = req.body.amount;
-        // const description = req.body.description;
-        // const category = req.body.category;
-        // const UserId = req.user.id;
-        
-        
+    
         const {amount, description, category} = req.body;
 
         if(amount === undefined || amount.length ===0 ){
@@ -84,34 +78,25 @@ exports.postRequest = async(req, res, next) => {
 // }
 
 
-const ITEMS_PER_PAGE = 2;
+
 
 exports.getRequest = async (req, res, next) => {
-    const page = +req.query.page || 1;
+    const ITEMS_PER_PAGE=5;
+    const page=+ req.query.page || 1;
+    let totalExp;
+    //console.log("req====>",req.user.id)
 
-    try {
-        // First, get the total number of expenses
-        const totalItems = await Expense.count();
+    const {count,rows}=await Expense.findAndCountAll({ where : { UserId: req.user.id},
+        offset: (page-1)*ITEMS_PER_PAGE,
+      //  limit: ITEMS_PER_PAGE
+        limit: 5
+    })
 
-        // Then, fetch the expenses for the current page
-        const expenses = await Expense.findAll({
-            offset: (page - 1) * ITEMS_PER_PAGE,
-            limit: ITEMS_PER_PAGE,
-        });
+    console.log("count======>",count)
+    console.log("expenses======>",rows)
+    totalExp=count;
+    res.status(200).json({allExpenses:rows, currentPage:page, hasNextPage: ITEMS_PER_PAGE*page<totalExp, nextPage:page+1, hasPreviousPage: page>1, previousPage: page-1, lastPage: Math.ceil(totalExp/ITEMS_PER_PAGE)})
 
-        res.json({
-            expenses: expenses,
-            currentPage: page,
-            hasNextPage: ITEMS_PER_PAGE * page < totalItems,
-            nextPage: page + 1,
-            hasPreviousPage: page > 1,
-            previousPage: page - 1,
-            lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
-        });
-    } catch (error) {
-        console.log("getting expenses failed: ", error);
-        res.status(500).json({ error: "Failed to fetch expenses" });
-    }
 };
 
 

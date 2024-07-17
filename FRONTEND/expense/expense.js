@@ -21,81 +21,86 @@ function parseJwt (token) {
 //get Request
 
 window.addEventListener("DOMContentLoaded", (event)=>{
-    const token = localStorage.getItem("token");
-    const decodeToken = parseJwt(token);
-    console.log(decodeToken);
-    const ispremiumuser = decodeToken.ispremiumuser;
-    if(ispremiumuser){
-       showPremiumuserMessage();
-       showLeaderboard();
-       reportGeneration();
-    }
-
-    //pagenating Start
-    const page =1;
-    fetchExpenses(page);
+  const objUrlParams=new URLSearchParams(window.location.search);
+  const page =objUrlParams.get("page") || 1;
+  const token  = localStorage.getItem('token')
+  //console.log("token======>",token)
+  const decodeToken = parseJwt(token)
+  //console.log(decodeToken)
+  //console.log(decodeToken.ispremiumuser)
+  if(decodeToken.ispremiumuser){
+    showPremiumuserMessage();
+    showLeaderboard();
+    reportGeneration();
+  }
+  axios.get(`http://localhost:1000/expense/get-expenses?page=${page}`, { headers: {"Authorization" : token} })
+  .then((response)=>{
     
-    //pagenating End
-    function fetchExpenses(page){
-    axios.get(`http://localhost:1000/expense/get-expenses?page=${page}`, { headers: {"Authorization" : token }})
-        .then((result)=>{
-           //console.log(result.data.allExpenses);
-            listExpenses(result.data.allExpenses);
-            showPagination(result.data); // result.data        
-        })
-        .catch((error) => {
-            console.log("get request failed from axios", error);
-        })
+    console.log(response);
+    for(var i=0;i<response.data.allExpenses.length;i++){
+        showExpenseOnScreen(response.data.allExpenses[i]);
+    }
+    //console.log(response.data);
+    showPagination(response.data);
+  })
+  .catch((err)=>{
+    console.log(err);
+  })
+})
 
+
+
+function showPagination({currentPage,hasNextPage,nextPage,hasPreviousPage,previousPage,lastPage}){
+    const pagination = document.getElementById('pagination');
+    if (!pagination) {
+        console.error('Pagination element not found');
+        return;
     }
 
-
-    function listExpenses(expenses) {
-        const expensesContainer = document.getElementById("expensesContainer");
-        expensesContainer.innerHTML = ""; // Clear previous expenses
-        for (let i = 0; i < expenses.length; i++) {
-            showExpenseOnScreen(expenses[i]);
-        }
+    pagination.innerHTML='';
+    if(hasPreviousPage){
+      
+      const btn2=document.createElement('button')
+      btn2.className="btn btn-info"
+      btn2.style.margin="5px"
+      btn2.innerHTML=previousPage
+      btn2.addEventListener('click',()=> getProducts(previousPage))
+      pagination.appendChild(btn2)
     }
+    const btn1=document.createElement('button')
+    btn1.className="btn btn-info"
+    btn1.style.margin="5px"
+    btn1.innerHTML=`<h3>${currentPage}</h3>`
+    btn1.addEventListener('click',()=> getProducts(currentPage))
+    pagination.appendChild(btn1)
+    if(hasNextPage){
+      
+      const btn3=document.createElement('button')
+      btn3.style.margin="5px"
+      btn3.className="btn btn-info"
+      btn3.innerHTML=nextPage
+      btn3.addEventListener('click',()=> getProducts(nextPage))
+      pagination.appendChild(btn3)
+    }
+  }
 
-
-function showPagination({
-    currentPage,
-    hasNextPage,
-    nextPage,
-    hasPreviousPage,
-    previousPage,
-    lastPage,
-}){
-
-    const paginationContainer = document.getElementById("paginationContainer");
-    paginationContainer.innerHTML = ""; 
-
-
-if(hasPreviousPage){
-    const btn2 = document.createElement("button");
-    btn2.innerHTML = previousPage;
-    btn2.addEventListener("click", ()=> fetchExpenses(previousPage));
-    showPagination.appendChild(btn2);
-}
-
-if(hasNextPage){
-    const btn3 = document.createElement(button);
-    btn3.innerHTML = nextPage;
-    btn3.addEventListener("click", () => fetchExpenses(nextPage));
-    pagination.appendChild(btn3);
-}
-
-const btn1 = document.createElement("button");
-btn1.innerHTML = `<h3>${currentPage}</h3>`;
-btn1.addEventListener("click", ()=> fetchExpenses(currentPage));
-pagination.appendChild(btn1);
-
-}
-});
-
-
-
+  function getProducts(page){
+    const parentNode=document.getElementById('ul');
+    parentNode.innerHTML='';
+    const token  = localStorage.getItem('token')
+    axios.get(`http://localhost:1000/expense/get-expenses?page=${page}`, { headers: {"Authorization" : token} })
+    .then((response)=>{
+      
+      console.log(response);
+      for(var i=0;i<response.data.allExpenses.length;i++){
+        showExpenseOnScreen(response.data.allExpenses[i]);
+      }
+      showPagination(response.data);
+    })
+    .catch((err)=>{
+      console.log(err);
+    })
+  }
 
 
 //put request
@@ -245,22 +250,28 @@ function reportGeneration(){
     const inputElement = document.createElement("input");
     inputElement.type = "button";
     inputElement.value = "Report Generation";
-    inputElement.onclick = async() =>{
+    inputElement.onclick = () =>{
         try{
-            const response = await axios.get('http://localhost:1000/user/download', {
-                headers: { "Authorization": token }
-            });
-    
-            if (response.status === 201) {
-                // The backend is essentially sending a download link
-                // which if we open in the browser, the file would download
-                const a = document.createElement("a");
-                a.href = response.data.fileUrl;
-                a.download = 'myexpense.csv';
-                a.click();
-            } else {
-                throw new Error(response.data.message);
-            }
+
+            axios.get('http://localhost:1000/user/download', { headers: {"Authorization" : token} })
+                .then((response) => {
+                if(response){
+          //the bcakend is essentially sending a download link
+          //  which if we open in browser, the file would download
+                    var a = document.createElement("a");
+                     a.href = response.data.fileURL;
+                     a.download = 'myexpense.txt';
+                     a.click();
+      } else {
+          console.log("Something went wrong")
+      }
+
+  })
+  .catch((err) => {
+      console.log(err);
+  });
+
+           
     }
         catch(error){
             console.log("report generation failed:", error);

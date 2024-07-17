@@ -4,8 +4,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const bodyParser = require("body-parser");
 
-//const getExpenses = require("../services/UserServices"); // Adjust this import based on your actual file structure
-//const uplaodToS3 = require("../services/S3Service"); // Adjust this import based on your actual file structure
 const express = require("express");
 const router = express.Router();
 

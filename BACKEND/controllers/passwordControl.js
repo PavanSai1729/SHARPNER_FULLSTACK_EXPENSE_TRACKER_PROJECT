@@ -108,7 +108,7 @@ const updatepassword = (req, res) => {
         const { resetpasswordid } = req.params;
         ForgotPassword.findOne({ where : { id: resetpasswordid }}).then(resetpasswordrequest => {
             User.findOne({where: { id : resetpasswordrequest.UserId}}).then(user => {
-                // console.log('userDetails', user)
+            
                 if(user) {
                     //encrypt the password
 
@@ -139,8 +139,6 @@ const updatepassword = (req, res) => {
     }
 
 }
-
-
 
 
 module.exports = {

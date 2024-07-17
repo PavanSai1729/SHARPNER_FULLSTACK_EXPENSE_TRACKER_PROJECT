@@ -3,9 +3,18 @@ const Expense = require("../models/expenseModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const getExpenses = require("../services/UserServices"); // Adjust this import based on your actual file structure
+const uplaodToS3 = require("../services/S3Service"); // Adjust this import based on your actual file structure
+
+
 const path = require('path');
 const fs = require('fs');
 const { createObjectCsvWriter } = require('csv-writer');
+
+const { BlobServiceClient } = require("@azure/storage-blob");
+const { v1: uuidv1 } = require("uuid");
+require('dotenv').config();
+
 
 
 function isstringinvalid(string){
@@ -91,45 +100,20 @@ exports.login = async(req, res, next) => {
 
 exports.reportGeneration = async (req, res) => {
     try {
+        // Assuming getExpenses returns expenses for the user
+        const expenses = await getExpenses(req);
+        console.log(expenses);
+
+        const stringifiedExpenses = JSON.stringify(expenses);
         const userId = req.user.id;
 
-        // Fetch user expenses
-        const expenses = await Expense.findAll({ where: { userId } });
+        const filename = `Expense${userId}/${new Date().toISOString()}.txt`; // Corrected filename construction
+        const fileURL = await uplaodToS3(stringifiedExpenses, filename); // Corrected function name
 
-        if (expenses.length === 0) {
-            return res.status(404).json({ message: 'No expenses found for the user.' });
-        }
-
-        // Define CSV file path
-        const downloadsDir = path.join(__dirname, '..', 'downloads');
-        const filePath = path.join(downloadsDir, `expenses_${userId}.csv`);
-
-        // Ensure the downloads directory exists
-        if (!fs.existsSync(downloadsDir)) {
-            fs.mkdirSync(downloadsDir);
-        }
-
-        // Define CSV writer
-        const csvWriter = createObjectCsvWriter({
-            path: filePath,
-            header: [
-                { id: 'id', title: 'ID' },
-                { id: 'amount', title: 'Amount' },
-                { id: 'description', title: 'Description' },
-                { id: 'category', title: 'Category' }
-            ]
-        });
-
-        // Write expenses to CSV
-        await csvWriter.writeRecords(expenses.map(expense => expense.dataValues));
-
-        // Send file URL for download
-        
-        res.status(201).json({ fileUrl: `http://localhost:1000/downloads/expenses_${userId}.csv` });
+        console.log(fileURL);
+        res.status(200).json({ fileURL, success: true });
     } catch (error) {
-        console.log("Getting report from database failed: ", error);
-        res.status(500).json({ message: 'Internal server error.' });
+        console.error(error);
+        res.status(500).json({ fileURL: "", success: false, error: error.message || "Something went wrong" });
     }
 };
-
-

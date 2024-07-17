@@ -31,18 +31,70 @@ window.addEventListener("DOMContentLoaded", (event)=>{
        reportGeneration();
     }
 
-    axios.get("http://localhost:1000/expense/get-expenses", { headers: {"Authorization" : token }})
+    //pagenating Start
+    const page =1;
+    fetchExpenses(page);
+    
+    //pagenating End
+    function fetchExpenses(page){
+    axios.get(`http://localhost:1000/expense/get-expenses?page=${page}`, { headers: {"Authorization" : token }})
         .then((result)=>{
            //console.log(result.data.allExpenses);
-
-            for(var i=0; i<result.data.allExpenses.length; i++){
-                showExpenseOnScreen(result.data.allExpenses[i]);
-            }
+            listExpenses(result.data.allExpenses);
+            showPagination(result.data); // result.data        
         })
         .catch((error) => {
             console.log("get request failed from axios", error);
         })
+
+    }
+
+
+    function listExpenses(expenses) {
+        const expensesContainer = document.getElementById("expensesContainer");
+        expensesContainer.innerHTML = ""; // Clear previous expenses
+        for (let i = 0; i < expenses.length; i++) {
+            showExpenseOnScreen(expenses[i]);
+        }
+    }
+
+function showPagination({
+    currentPage,
+    hasNextPage,
+    nextPage,
+    hasPreviousPage,
+    previousPage,
+    lastPage,
+}){
+
+    const paginationContainer = document.getElementById("paginationContainer");
+    paginationContainer.innerHTML = ""; 
+
+
+if(hasPreviousPage){
+    const btn2 = document.createElement("button");
+    btn2.innerHTML = previousPage;
+    btn2.addEventListener("click", ()=> fetchExpenses(previousPage));
+    showPagination.appendChild(btn2);
+}
+
+if(hasNextPage){
+    const btn3 = document.createElement(button);
+    btn3.innerHTML = nextPage;
+    btn3.addEventListener("click", () => fetchExpenses(nextPage));
+    pagination.appendChild(btn3);
+}
+
+const btn1 = document.createElement("button");
+btn1.innerHTML = `<h3>${currentPage}</h3>`;
+btn1.addEventListener("click", ()=> fetchExpenses(currentPage));
+pagination.appendChild(btn1);
+
+}
 });
+
+
+
 
 
 //put request

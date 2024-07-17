@@ -45,16 +45,76 @@ exports.postRequest = async(req, res, next) => {
 };
 
 
-exports.getRequest = async(req, res, next) => {
-    try{
-        const expenses = await Expense.findAll({where: {UserId: req.user.id}});
-        res.status(200).json({allExpenses: expenses});
-    }
-    catch(error){
-        console.log("get request failed from backend", JSON.stringify(error));
-        res.status(500).json({error: error});
+// exports.getRequest = async(req, res, next) => {
+//     try{
+//         const expenses = await Expense.findAll({where: {UserId: req.user.id}});
+//         res.status(200).json({allExpenses: expenses});
+//     }
+//     catch(error){
+//         console.log("get request failed from backend", JSON.stringify(error));
+//         res.status(500).json({error: error});
+//     }
+// };
+
+// const ITEMS_PER_PAGE =2;
+
+// exports.getRequest = async(req, res, next)=>{
+//     const page = +req.query.page || 1;
+//     let totalItems;
+
+//     Expense.findAll({
+//                 offset: page -1 * ITEMS_PER_PAGE,
+//                 limit: ITEMS_PER_PAGE,
+//             })
+//         .then((expenses)=>{
+//             res.json({
+//                 expenses: expenses,
+//                 currentPage: page,
+//                 hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+//                 nextPage: page+1,
+//                 hasPreviousPage: page>1,
+//                 previousPage: page-1,
+//                 lastPage: Math.ceil(totalItems/ITEMS_PER_PAGE),
+                
+//             })
+//         })
+//         .catch((error)=>{
+//             console.log("getting expenses failed: ",error);
+//         })
+// }
+
+
+const ITEMS_PER_PAGE = 2;
+
+exports.getRequest = async (req, res, next) => {
+    const page = +req.query.page || 1;
+
+    try {
+        // First, get the total number of expenses
+        const totalItems = await Expense.count();
+
+        // Then, fetch the expenses for the current page
+        const expenses = await Expense.findAll({
+            offset: (page - 1) * ITEMS_PER_PAGE,
+            limit: ITEMS_PER_PAGE,
+        });
+
+        res.json({
+            expenses: expenses,
+            currentPage: page,
+            hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+            nextPage: page + 1,
+            hasPreviousPage: page > 1,
+            previousPage: page - 1,
+            lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE),
+        });
+    } catch (error) {
+        console.log("getting expenses failed: ", error);
+        res.status(500).json({ error: "Failed to fetch expenses" });
     }
 };
+
+
 
 
 exports.deleteRequest = async(req, res, next) => {

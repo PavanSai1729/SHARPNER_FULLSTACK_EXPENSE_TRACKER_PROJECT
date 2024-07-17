@@ -58,6 +58,7 @@ window.addEventListener("DOMContentLoaded", (event)=>{
         }
     }
 
+
 function showPagination({
     currentPage,
     hasNextPage,
@@ -129,7 +130,7 @@ form.addEventListener("submit", (event) => {
 });
 
 
-
+//show expenses on screen
 
 function showExpenseOnScreen(expense){
     const pElement = document.getElementById("ul");
